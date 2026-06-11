@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}首页 - 校园活动管理平台{% endblock %}
+{% block content %}
+<div class="hero-section text-center py-5 mb-4 bg-light rounded">
+    <h1 class="display-5">校园活动管理平台</h1>
+    <p class="lead text-muted">发现精彩活动，参与校园生活</p>
+    <a href="{{ url_for('main.activity_list') }}" class="btn btn-primary btn-lg">浏览全部活动</a>
+</div>
+
+<div class="mb-4">
+    <h4>活动分类</h4>
+    <div class="d-flex flex-wrap gap-2">
+        {% for value, label in categories %}
+        <a href="{{ url_for('main.activity_list', category=value) }}" class="btn btn-outline-primary">{{ label }}</a>
+        {% endfor %}
+    </div>
+</div>
+
+<h4 class="mb-3">最新活动</h4>
+{% if activities %}
+<div class="row">
+    {% for activity in activities %}
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <span class="badge bg-info mb-2">
+                    {% for v, l in categories %}{% if v == activity.category %}{{ l }}{% endif %}{% endfor %}
+                </span>
+                <h5 class="card-title">{{ activity.title }}</h5>
+                <p class="card-text text-muted small">
+                    {{ activity.start_time.strftime('%Y-%m-%d %H:%M') }}<br>
+                    {% if activity.location %}地点：{{ activity.location }}{% endif %}
+                </p>
+                <p class="card-text">{{ activity.description[:80] }}{% if activity.description|length > 80 %}...{% endif %}</p>
+            </div>
+            <div class="card-footer bg-white d-flex justify-content-between align-items-center">
+                <small class="text-muted">
+                    {% if activity.max_participants > 0 %}
+                        {{ activity.current_participants }}/{{ activity.max_participants }}人
+                    {% else %}
+                        {{ activity.current_participants }}人已报名
+                    {% endif %}
+                </small>
+                <a href="{{ url_for('main.activity_detail', activity_id=activity.id) }}" class="btn btn-sm btn-outline-primary">查看详情</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p class="text-muted">暂无活动</p>
+{% endif %}
+{% endblock %}

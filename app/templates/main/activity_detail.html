@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}{{ activity.title }} - 校园活动管理平台{% endblock %}
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">首页</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('main.activity_list') }}">活动列表</a></li>
+        <li class="breadcrumb-item active">{{ activity.title }}</li>
+    </ol>
+</nav>
+
+<div class="row">
+    <div class="col-md-8">
+        <h2>{{ activity.title }}</h2>
+        <span class="badge bg-info mb-3">
+            {% for v, l in categories %}{% if v == activity.category %}{{ l }}{% endif %}{% endfor %}
+        </span>
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5>活动详情</h5>
+                <p style="white-space: pre-wrap;">{{ activity.description }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">活动信息</h5>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><strong>组织者：</strong>{{ activity.organizer.real_name }}</li>
+                    <li class="mb-2"><strong>开始时间：</strong>{{ activity.start_time.strftime('%Y-%m-%d %H:%M') }}</li>
+                    <li class="mb-2"><strong>结束时间：</strong>{{ activity.end_time.strftime('%Y-%m-%d %H:%M') }}</li>
+                    {% if activity.location %}
+                    <li class="mb-2"><strong>地点：</strong>{{ activity.location }}</li>
+                    {% endif %}
+                    {% if activity.registration_deadline %}
+                    <li class="mb-2"><strong>报名截止：</strong>{{ activity.registration_deadline.strftime('%Y-%m-%d %H:%M') }}</li>
+                    {% endif %}
+                    <li class="mb-2">
+                        <strong>报名人数：</strong>
+                        {% if activity.max_participants > 0 %}
+                            {{ activity.current_participants }}/{{ activity.max_participants }}
+                        {% else %}
+                            {{ activity.current_participants }}（不限人数）
+                        {% endif %}
+                    </li>
+                </ul>
+
+                {% if activity.max_participants > 0 %}
+                <div class="progress mb-3">
+                    {% set percent = (activity.current_participants / activity.max_participants * 100) | int %}
+                    <div class="progress-bar {% if percent >= 90 %}bg-danger{% elif percent >= 60 %}bg-warning{% endif %}"
+                         style="width: {{ percent }}%">{{ percent }}%</div>
+                </div>
+                {% endif %}
+
+                {% if current_user.is_authenticated and current_user.role == 'student' %}
+                    {% set existing_reg = activity.registrations.filter_by(user_id=current_user.id, status='registered').first() %}
+                    {% if existing_reg %}
+                        <div class="alert alert-success">您已报名此活动</div>
+                        <form method="POST" action="{{ url_for('student.cancel_registration', registration_id=existing_reg.id) }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-outline-danger w-100" onclick="return confirm('确定取消报名吗？')">取消报名</button>
+                        </form>
+                    {% elif activity.is_full %}
+                        <div class="alert alert-warning">报名已满</div>
+                    {% else %}
+                        <form method="POST" action="{{ url_for('student.register_activity', activity_id=activity.id) }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-primary w-100">立即报名</button>
+                        </form>
+                    {% endif %}
+                {% elif not current_user.is_authenticated %}
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary w-100">登录后报名</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

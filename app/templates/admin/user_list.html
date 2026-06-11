@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}用户管理 - 校园活动管理平台{% endblock %}
+{% block content %}
+<h3 class="mb-4">用户管理</h3>
+
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead class="table-light">
+            <tr>
+                <th>用户名</th>
+                <th>真实姓名</th>
+                <th>邮箱</th>
+                <th>角色</th>
+                <th>状态</th>
+                <th>注册时间</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.username }}</td>
+                <td>{{ user.real_name }}</td>
+                <td>{{ user.email }}</td>
+                <td>
+                    {% if user.role == 'student' %}
+                        <span class="badge bg-primary">学生</span>
+                    {% elif user.role == 'organizer' %}
+                        <span class="badge bg-info">组织者</span>
+                    {% else %}
+                        <span class="badge bg-dark">管理员</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if user.is_active_user %}
+                        <span class="badge bg-success">正常</span>
+                    {% else %}
+                        <span class="badge bg-danger">已禁用</span>
+                    {% endif %}
+                </td>
+                <td>{{ user.created_at.strftime('%Y-%m-%d') }}</td>
+                <td>
+                    {% if user.id != current_user.id %}
+                    <form method="POST" action="{{ url_for('admin.toggle_user', user_id=user.id) }}" class="d-inline">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        {% if user.is_active_user %}
+                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('确定禁用该用户吗？')">禁用</button>
+                        {% else %}
+                        <button type="submit" class="btn btn-sm btn-outline-success">启用</button>
+                        {% endif %}
+                    </form>
+                    {% else %}
+                    <span class="text-muted">当前用户</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Pagination -->
+{% if pagination.pages > 1 %}
+<nav>
+    <ul class="pagination justify-content-center">
+        {% if pagination.has_prev %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('admin.user_list', page=pagination.prev_num) }}">上一页</a>
+        </li>
+        {% endif %}
+        {% for p in pagination.iter_pages() %}
+            {% if p %}
+            <li class="page-item {% if p == pagination.page %}active{% endif %}">
+                <a class="page-link" href="{{ url_for('admin.user_list', page=p) }}">{{ p }}</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled"><span class="page-link">...</span></li>
+            {% endif %}
+        {% endfor %}
+        {% if pagination.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('admin.user_list', page=pagination.next_num) }}">下一页</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip --version)",
+      "Bash(python -m venv venv)",
+      "Bash(where python *)",
+      "Bash(py --version)",
+      "Bash(python3 -m venv venv)",
+      "Bash(/c/Users/24326/AppData/Local/Microsoft/WindowsApps/python3 *)",
+      "Read(//c/Users/24326/AppData/Local/Programs/Python/**)",
+      "Bash(ls /c/Python*/python.exe)",
+      "Bash(py *)",
+      "Bash(venv/Scripts/pip.exe install *)",
+      "Bash(venv/Scripts/python.exe *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://127.0.0.1:5000/)",
+      "Bash(kill %1)",
+      "Bash(curl -s http://127.0.0.1:5000/)",
+      "Bash(curl -sL http://127.0.0.1:5000/)",
+      "Bash(curl -s http://127.0.0.1:5001/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://127.0.0.1:5001/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://127.0.0.1:5001/activities)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://127.0.0.1:5001/auth/login)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://127.0.0.1:5001/auth/register)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://127.0.0.1:5001/admin/dashboard)"
+    ]
+  }
+}

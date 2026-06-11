@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}组织者中心 - 校园活动管理平台{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3>我的活动</h3>
+    <a href="{{ url_for('organizer.create_activity') }}" class="btn btn-primary">创建新活动</a>
+</div>
+
+{% if activities %}
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead class="table-light">
+            <tr>
+                <th>活动标题</th>
+                <th>分类</th>
+                <th>时间</th>
+                <th>报名人数</th>
+                <th>状态</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for activity in activities %}
+            <tr>
+                <td>{{ activity.title }}</td>
+                <td>{% for v, l in categories %}{% if v == activity.category %}{{ l }}{% endif %}{% endfor %}</td>
+                <td>{{ activity.start_time.strftime('%Y-%m-%d') }}</td>
+                <td>
+                    {% if activity.max_participants > 0 %}
+                        {{ activity.current_participants }}/{{ activity.max_participants }}
+                    {% else %}
+                        {{ activity.current_participants }}
+                    {% endif %}
+                </td>
+                <td>
+                    {% if activity.status == 'pending' %}
+                        <span class="badge bg-warning">待审核</span>
+                    {% elif activity.status == 'approved' %}
+                        <span class="badge bg-success">已通过</span>
+                    {% else %}
+                        <span class="badge bg-danger" title="{{ activity.reject_reason }}">已驳回</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="btn-group btn-group-sm">
+                        <a href="{{ url_for('organizer.edit_activity', activity_id=activity.id) }}" class="btn btn-outline-primary">编辑</a>
+                        <a href="{{ url_for('organizer.participants', activity_id=activity.id) }}" class="btn btn-outline-info">名单</a>
+                        <form method="POST" action="{{ url_for('organizer.delete_activity', activity_id=activity.id) }}" class="d-inline">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('确定删除此活动吗？')">删除</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% if activity.status == 'rejected' and activity.reject_reason %}
+            <tr>
+                <td colspan="6" class="text-danger small">驳回原因：{{ activity.reject_reason }}</td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="text-center py-5">
+    <p class="text-muted">还没有创建任何活动</p>
+    <a href="{{ url_for('organizer.create_activity') }}" class="btn btn-primary">创建第一个活动</a>
+</div>
+{% endif %}
+{% endblock %}

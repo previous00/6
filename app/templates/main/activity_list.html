@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}活动列表 - 校园活动管理平台{% endblock %}
+{% block content %}
+<h3 class="mb-4">活动列表</h3>
+
+<form class="row g-3 mb-4" method="GET" action="{{ url_for('main.activity_list') }}">
+    <div class="col-md-5">
+        <input type="text" class="form-control" name="keyword" placeholder="搜索活动标题..." value="{{ keyword }}">
+    </div>
+    <div class="col-md-4">
+        <select class="form-select" name="category">
+            <option value="">全部分类</option>
+            {% for value, label in categories %}
+            <option value="{{ value }}" {% if category == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-3">
+        <button type="submit" class="btn btn-primary w-100">搜索</button>
+    </div>
+</form>
+
+{% if activities %}
+<div class="row">
+    {% for activity in activities %}
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <span class="badge bg-info mb-2">
+                    {% for v, l in categories %}{% if v == activity.category %}{{ l }}{% endif %}{% endfor %}
+                </span>
+                <h5 class="card-title">{{ activity.title }}</h5>
+                <p class="card-text text-muted small">
+                    {{ activity.start_time.strftime('%Y-%m-%d %H:%M') }}<br>
+                    {% if activity.location %}地点：{{ activity.location }}{% endif %}
+                </p>
+                <p class="card-text">{{ activity.description[:80] }}{% if activity.description|length > 80 %}...{% endif %}</p>
+            </div>
+            <div class="card-footer bg-white d-flex justify-content-between align-items-center">
+                <small class="text-muted">
+                    {% if activity.max_participants > 0 %}
+                        {{ activity.current_participants }}/{{ activity.max_participants }}人
+                    {% else %}
+                        {{ activity.current_participants }}人已报名
+                    {% endif %}
+                </small>
+                <a href="{{ url_for('main.activity_detail', activity_id=activity.id) }}" class="btn btn-sm btn-outline-primary">查看详情</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Pagination -->
+<nav>
+    <ul class="pagination justify-content-center">
+        {% if pagination.has_prev %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('main.activity_list', page=pagination.prev_num, keyword=keyword, category=category) }}">上一页</a>
+        </li>
+        {% endif %}
+        {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+            {% if p %}
+            <li class="page-item {% if p == pagination.page %}active{% endif %}">
+                <a class="page-link" href="{{ url_for('main.activity_list', page=p, keyword=keyword, category=category) }}">{{ p }}</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled"><span class="page-link">...</span></li>
+            {% endif %}
+        {% endfor %}
+        {% if pagination.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('main.activity_list', page=pagination.next_num, keyword=keyword, category=category) }}">下一页</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% else %}
+<div class="text-center py-5">
+    <p class="text-muted">没有找到相关活动</p>
+</div>
+{% endif %}
+{% endblock %}

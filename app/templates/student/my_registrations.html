@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}我的报名 - 校园活动管理平台{% endblock %}
+{% block content %}
+<h3 class="mb-4">我的报名</h3>
+
+{% if registrations %}
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead class="table-light">
+            <tr>
+                <th>活动名称</th>
+                <th>分类</th>
+                <th>活动时间</th>
+                <th>地点</th>
+                <th>报名时间</th>
+                <th>状态</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for reg in registrations %}
+            <tr>
+                <td>
+                    <a href="{{ url_for('main.activity_detail', activity_id=reg.activity.id) }}">{{ reg.activity.title }}</a>
+                </td>
+                <td>{% for v, l in categories %}{% if v == reg.activity.category %}{{ l }}{% endif %}{% endfor %}</td>
+                <td>{{ reg.activity.start_time.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>{{ reg.activity.location or '-' }}</td>
+                <td>{{ reg.registered_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>
+                    {% if reg.status == 'registered' %}
+                        <span class="badge bg-success">已报名</span>
+                    {% else %}
+                        <span class="badge bg-secondary">已取消</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if reg.status == 'registered' %}
+                    <form method="POST" action="{{ url_for('student.cancel_registration', registration_id=reg.id) }}" class="d-inline">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('确定取消报名吗？')">取消报名</button>
+                    </form>
+                    {% else %}
+                    <span class="text-muted">-</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="text-center py-5">
+    <p class="text-muted">暂无报名记录</p>
+    <a href="{{ url_for('main.activity_list') }}" class="btn btn-primary">浏览活动</a>
+</div>
+{% endif %}
+{% endblock %}
